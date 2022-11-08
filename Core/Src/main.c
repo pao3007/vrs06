@@ -18,7 +18,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "gpio.h"
+#include "usart.h"
+#include "stdio.h"
+#include "string.h"
+#include "hts221.h"
+#include "dma.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -47,7 +53,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -104,7 +109,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	  hts221_get_temp();
+	  LL_mDelay(20);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -143,28 +149,6 @@ void SystemClock_Config(void)
   LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_HSI);
 }
 
-/**
-  * @brief I2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
-
-/**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-
-
-/**
-  * Enable DMA controller clock
-  */
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
 
 /* USER CODE BEGIN 4 */
 

@@ -20,6 +20,32 @@ void hts221_write_byte(uint8_t reg_addr, uint8_t value)
 	i2c_master_write(value, reg_addr, addres, 0);
 }
 
+void hts221_readArray(uint8_t * data, uint8_t reg, uint8_t length)
+{
+	i2c_master_read(data, length, reg, addres, 1);
+}
+
+int8_t hts221_get_temp()
+{
+	uint8_t temp[2];
+	hts221_readArray(temp, HTS221_ADDRESS_TEMP_L, 2);
+	LL_mDelay(10);
+
+	//return (((int16_t)((temp[1] << 8) | temp[0])) >> 3)  + 25;
+	return 1;
+}
+
+int8_t hts221_get_humidity()
+{
+	uint8_t hum[2];
+	hts221_readArray(hum, HTS221_ADDRESS_HUM_L, 2);
+
+	//return (((int16_t)((temp[1] << 8) | temp[0])) >> 3)  + 25;
+	return 1;
+}
+
+
+
 uint8_t hts221_init(void)
 {
 
@@ -29,7 +55,7 @@ uint8_t hts221_init(void)
 
 	LL_mDelay(100);
 
-	uint8_t val = lsm6ds0_read_byte(HTS221_WHO_AM_I_ADDRES);
+	uint8_t val = hts221_read_byte(HTS221_WHO_AM_I_ADDRES);
 
 	if(val == HTS221_WHO_AM_I_ADDRES)
 	{
