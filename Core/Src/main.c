@@ -15,6 +15,7 @@
   *
   ******************************************************************************
   */
+
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -48,7 +49,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+char formated_text[30];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,6 +101,7 @@ int main(void)
   MX_DMA_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
+  hts221_init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -109,7 +111,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  hts221_get_temp();
+	  memset(formated_text, '\0', sizeof(formated_text));
+	  sprintf(formated_text, "%2.2f,%d\r", hts221_get_temp(),hts221_get_humidity());
+	  USART2_PutBuffer((uint8_t*)formated_text, strlen(formated_text));
 	  LL_mDelay(20);
     /* USER CODE BEGIN 3 */
   }
