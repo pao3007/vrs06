@@ -25,7 +25,9 @@
 #include "stdio.h"
 #include "string.h"
 #include "hts221.h"
+#include "lps22hb.h"
 #include "dma.h"
+#include "math.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -50,6 +52,12 @@
 
 /* USER CODE BEGIN PV */
 char formated_text[30];
+float tlak;
+float ref;
+float teplota;
+float teplotaRef;
+float meanTlak;
+float buffer[SIZE_OF_BUFFER];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,6 +68,52 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+float get_altitude()
+{
+	float x = tlak/ref;
+	float y = 1/5.255;
+	float alt = (44330 * (1 - pow(x,y) ));
+	return alt;
+}
+
+float get_altitudeTemp()
+{
+	float x = ref/meanTlak;
+	float y = 1/5.257;
+	float altT = (((pow(x,y)-1)*(teplotaRef + 273.15))/0.0065);;
+	return altT;
+}
+
+void get_ref()
+{
+	ref = 0;
+	LL_mDelay(1000);
+	teplotaRef =  hts221_get_temp();
+	for(int i = 0; i < SIZE_OF_BUFFER;i++){
+		LL_mDelay(20);
+		buffer[i] = lps22hb_get_pressure();
+	}
+
+	for(int i = 0; i < SIZE_OF_BUFFER;i++){
+		ref += buffer[i];
+	}
+	ref = ref/50;
+}
+
+void mean_press()
+{
+	float tmp = 0;
+	for (int k = SIZE_OF_BUFFER-1; k > 0; k--){
+		buffer[k]=buffer[k-1];
+	}
+	tlak = lps22hb_get_pressure();
+	buffer[0] = tlak;
+	for(int i = 0; i < SIZE_OF_BUFFER;i++){
+		tmp += buffer[i];
+	}
+	meanTlak = tmp/SIZE_OF_BUFFER;
+
+}
 
 /* USER CODE END 0 */
 
@@ -101,7 +155,10 @@ int main(void)
   MX_DMA_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
+  lps22hb_init();
   hts221_init();
+  get_ref();
+
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -111,8 +168,12 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  mean_press();
+	  teplota = hts221_get_temp();
+	  //float vyska = get_altitude();
+	  float vyskaT = get_altitudeTemp();
 	  memset(formated_text, '\0', sizeof(formated_text));
-	  sprintf(formated_text, "%2.2f,%d\r", hts221_get_temp(),hts221_get_humidity());
+	  sprintf(formated_text, "%2.1f,%d,%4.2f,%3.2f\r",teplota,hts221_get_humidity(),meanTlak,vyskaT);
 	  USART2_PutBuffer((uint8_t*)formated_text, strlen(formated_text));
 	  LL_mDelay(20);
     /* USER CODE BEGIN 3 */

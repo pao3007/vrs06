@@ -5,8 +5,6 @@
  *      Author: lukac
  */
 
-
-
 #include "hts221.h"
 
 uint8_t addres = HTS221_DEVICE_ADDRESS;
@@ -35,6 +33,8 @@ float hts221_get_temp()
 
 	int16_t temp = tempArr[0];
 	temp |= (tempArr[1] << 8);
+
+
 
 	uint8_t T0_degC_x8 = hts221_read_byte(HTS_221_T0_DEGC_X8);
 	uint8_t T1_degC_x8 = hts221_read_byte(HTS_221_T1_DEGC_X8);
